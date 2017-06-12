@@ -100,11 +100,11 @@ class CodeshipSlackNotifier < Sinatra::Base
     build = @body['build']
     [{
       fallback: "Build #{status_text(build["status"])} - #{build["message"].split("\n")[0]} on #{build["project_name"]} / #{build["branch"]} by #{build["committer"]} - #{build["build_url"]}",
-      pretext: "<#{build["build_url"]}|Build #{status_text(build["status"])}>",
+      title: "<#{build["build_url"]}|Build #{status_text(build["status"])}>",
       color: status_color(build["status"]),
       fields: [
         { title: "Commit", value: "<#{build["commit_url"]}|#{build["message"].split("\n")[0]}>", short: false },
-        { title: "Branch", value: "#{build["project_name"]} / #{build["branch"]}", short: true },
+        { title: "Branch", value: "#{build["project_name"].sub("/", " / ")} / #{build["branch"]}", short: true },
         { title: "Committer", value: build["committer"], short: true },
       ],
     }]
