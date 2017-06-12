@@ -48,13 +48,13 @@ class CodeshipSlackNotifier < Sinatra::Base
     when 'success'
       'succeeded'
     when 'error'
-      'FAILED'
+      'failed'
     when 'stopped'
       'was stopped'
     when 'waiting'
       'is waiting to start'
     when 'infrastructure_failure'
-      'FAILED due to a Codeship error'
+      'failed due to a Codeship error'
     when 'ignored'
       'was ignored because the account is over the monthly build limit'
     when 'blocked'
@@ -99,11 +99,11 @@ class CodeshipSlackNotifier < Sinatra::Base
   def build_attachment
     build = @body['build']
     [{
-      fallback: "Build #{status_text(build["status"])} - #{build["message"]} on #{build["project_name"]} / #{build["branch"]} by #{build["committer"]} - #{build["build_url"]}",
+      fallback: "Build #{status_text(build["status"])} - #{build["message"].split("\n")[0]} on #{build["project_name"]} / #{build["branch"]} by #{build["committer"]} - #{build["build_url"]}",
       pretext: "<#{build["build_url"]}|Build #{status_text(build["status"])}>",
       color: status_color(build["status"]),
       fields: [
-        { title: "Commit", value: "<#{build["commit_url"]}|#{build["message"]}>", short: false },
+        { title: "Commit", value: "<#{build["commit_url"]}|#{build["message"].split("\n")[0]}>", short: false },
         { title: "Branch", value: "#{build["project_name"]} / #{build["branch"]}", short: true },
         { title: "Committer", value: build["committer"], short: true },
       ],
