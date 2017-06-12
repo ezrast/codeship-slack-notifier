@@ -87,6 +87,10 @@ class CodeshipSlackNotifier < Sinatra::Base
     end
   end
 
+  def encode(raw)
+    raw.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;")
+  end
+
   # def build_message
   #   build = @body['build']
   #   message = "<#{build['build_url']}|#{build['branch']}> build"
@@ -99,13 +103,13 @@ class CodeshipSlackNotifier < Sinatra::Base
   def build_attachment
     build = @body['build']
     [{
-      fallback: "Build #{status_text(build["status"])} - #{build["message"].split("\n")[0]} on #{build["project_name"]} / #{build["branch"]} by #{build["committer"]} - #{build["build_url"]}",
-      title: "<#{build["build_url"]}|Build #{status_text(build["status"])}>",
+      fallback: "Build #{status_text(build["status"])} - #{encode build["message"].split("\n")[0]} on #{encode build["project_name"]} / #{encode build["branch"]} by #{encode build["committer"]} - #{encode build["build_url"]}",
+      title: "<#{encode build["build_url"]}|Build #{status_text(build["status"])}>",
       color: status_color(build["status"]),
       fields: [
-        { title: "Commit", value: "<#{build["commit_url"]}|#{build["message"].split("\n")[0]}>", short: false },
-        { title: "Branch", value: "#{build["project_name"].sub("/", " / ")} / #{build["branch"]}", short: true },
-        { title: "Committer", value: build["committer"], short: true },
+        { title: "Commit", value: "<#{encode build["commit_url"]}|#{encode build["message"].split("\n")[0]}>", short: false },
+        { title: "Branch", value: "#{encode build["project_name"].sub("/", " / ")} / #{encode build["branch"]}", short: true },
+        { title: "Committer", value: encode(build["committer"]), short: true },
       ],
     }]
   end
