@@ -102,15 +102,28 @@ class CodeshipSlackNotifier < Sinatra::Base
 
   def build_attachment
     build = @body['build']
-    [{
-      fallback: "Build #{status_text(build["status"])} - #{encode build["message"].split("\n")[0]} on #{encode build["project_name"]} / #{encode build["branch"]} by #{encode build["committer"]} - #{encode build["build_url"]}",
-      title: "Build #{status_text(build["status"])}",
-      title_link: build["build_url"],
+    status = status_text(build["status"])
+    message = encode build["message"].split("\n")[0]
+    project = encode build["project_name"].sub("/", " / ")
+    branch = encode build["branch"]
+    committer = encode build["committer"]
+    build_url = encode build["build_url"]
+
+    return [{
+      fallback: "Build #{status} - #{message} on #{project} / #{branch} by #{committer} - #{build_url}",
+      title: "Build #{status}",
+      title_link: build_url,
       color: status_color(build["status"]),
       fields: [
-        { title: "Commit", value: "<#{encode build["commit_url"]}|#{encode build["message"].split("\n")[0]}>", short: false },
-        { title: "Branch", value: "#{encode build["project_name"].sub("/", " / ")} / #{encode build["branch"]}", short: true },
-        { title: "Committer", value: encode(build["committer"]), short: true },
+        { title: "Commit",
+          value: "<#{encode build["commit_url"]}|#{message}>",
+          short: false },
+        { title: "Branch",
+          value: "#{project} / #{branch}",
+          short: true },
+        { title: "Committer",
+          value: committer,
+          short: true },
       ],
     }]
   end
