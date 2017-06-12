@@ -64,13 +64,50 @@ class CodeshipSlackNotifier < Sinatra::Base
     end
   end
 
-  def build_message
+  def status_color(status)
+    case status
+    when 'testing'
+      nil
+    when 'success'
+      'good'
+    when 'error'
+      'danger'
+    when 'stopped'
+      nil
+    when 'waiting'
+      nil
+    when 'infrastructure_failure'
+      'danger'
+    when 'ignored'
+      nil
+    when 'blocked'
+      'danger'
+    else
+      'danger'
+    end
+  end
+
+  # def build_message
+  #   build = @body['build']
+  #   message = "<#{build['build_url']}|#{build['branch']}> build"
+  #   message += " (<#{build['commit_url']}|#{build['commit_id'][0..6]}>) " if build['commit_id'] && build['commit_url']
+  #   message += "#{message[-1] == ' ' ? '' : ' '}by #{build['committer']} " if build['committer']
+  #   message += status_text(build['status'])
+  #   message
+  # end
+
+  def build_attachment
     build = @body['build']
-    message = "<#{build['build_url']}|#{build['branch']}> build"
-    message += " (<#{build['commit_url']}|#{build['commit_id'][0..6]}>) " if build['commit_id'] && build['commit_url']
-    message += "#{message[-1] == ' ' ? '' : ' '}by #{build['committer']} " if build['committer']
-    message += status_text(build['status'])
-    message
+    [{
+      fallback: "Build #{status_text(build["status"])} - #{build["message"]} on #{build["project_name"]} / #{build["branch"]} by #{build["committer"]} - #{build["build_url"]}",
+      pretext: "<#{build["build_url"]}|Build #{status_text(build["status"])}>",
+      color: status_color(build["status"]),
+      fields: [
+        { title: "Commit", value: "<#{build["commit_url"]}|#{build["message"]}>", short: false },
+        { title: "Branch", value: "#{build["project_name"]} / #{build["branch"]}", short: true },
+        { title: "Committer", value: build["committer"], short: true },
+      ],
+    }]
   end
 
   def notify_slack
@@ -91,7 +128,7 @@ class CodeshipSlackNotifier < Sinatra::Base
       channels = branch_settings['channel']
     end
     [*channels].compact.each do |channel|
-      Slack::Post.post(build_message, channel)
+      Slack::Post.post_with_attachments(nil, build_attachment, channel)
     end
   end
 
