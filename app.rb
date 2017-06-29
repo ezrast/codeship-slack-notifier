@@ -60,7 +60,7 @@ class CodeshipSlackNotifier < Sinatra::Base
     when 'blocked'
       'was blocked because of excessive resource consumption'
     else
-      'did something weird...'
+      "reported unexpected status: #{status}"
     end
   end
 
