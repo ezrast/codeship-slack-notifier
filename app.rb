@@ -43,7 +43,7 @@ class CodeshipSlackNotifier < Sinatra::Base
 
   def status_text(status)
     case status
-    when 'testing'
+    when 'testing', 'initiated'
       'is pending'
     when 'success'
       'succeeded'
